@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SABV — Theory Quiz</title>
+<style>
+/* ===== SABV Theory Quiz — "valuation desk" aesthetic ===== */
+:root{
+  --ink:#FFFFFF;          /* page background (white) */
+  --ink-2:#F6F8FA;        /* panel / card surface (very light grey) */
+  --ink-3:#EEF2F6;        /* raised / track surface */
+  --line:#DDE4EC;         /* hairline border */
+  --line-soft:#E6ECF2;
+  --txt:#16202B;          /* primary text (near-black) */
+  --txt-dim:#52616F;       /* secondary text */
+  --txt-faint:#8593A1;     /* tertiary text */
+  --teal:#0E9E8C;          /* primary accent (correct / actions) — darkened for contrast on white */
+  --teal-dim:#13B3A0;
+  --teal-bg:rgba(14,158,140,.10);
+  --amber:#C8810A;         /* flag for review — darkened for white bg */
+  --amber-bg:rgba(200,129,10,.12);
+  --red:#D64545;           /* incorrect — darkened for white bg */
+  --red-bg:rgba(214,69,69,.09);
+  --blue:#2F6FE0;          /* neutral highlight */
+  --on-accent:#FFFFFF;     /* text on coloured (teal/red) fills */
+  --shadow:0 6px 24px rgba(22,32,43,.08);
+  --mono:'SF Mono',ui-monospace,'Cascadia Mono','JetBrains Mono',Menlo,Consolas,monospace;
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(14,158,140,.06), transparent 60%),
+    radial-gradient(900px 500px at -10% 10%, rgba(47,111,224,.05), transparent 55%),
+    var(--ink);
+  color:var(--txt); font-family:var(--sans); line-height:1.55;
+  -webkit-font-smoothing:antialiased; padding:env(safe-area-inset-top) 0 0;
+}
+#app{max-width:980px;margin:0 auto;padding:24px 20px 80px}
+.mono{font-family:var(--mono)}
+
+/* ---------- generic ---------- */
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--teal);font-weight:600}
+.btn{font-family:var(--sans);font-weight:600;font-size:15px;border:none;border-radius:10px;padding:13px 22px;cursor:pointer;transition:transform .12s ease,background .15s ease,border-color .15s ease,opacity .15s;display:inline-flex;align-items:center;gap:9px}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--teal);color:var(--on-accent)}
+.btn-primary:hover{background:#0B8979}
+.btn-ghost{background:transparent;color:var(--txt-dim);border:1px solid var(--line)}
+.btn-ghost:hover{border-color:var(--teal-dim);color:var(--txt)}
+.btn-amber{background:transparent;color:var(--amber);border:1px solid rgba(244,181,63,.4)}
+.btn-amber:hover{background:var(--amber-bg)}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.btn-lg{padding:16px 30px;font-size:16px}
+
+/* ============ START SCREEN ============ */
+.hero{padding:34px 0 8px;text-align:left;animation:fadeUp .5s ease both}
+.hero .kicker{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.hero .pulse{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 0 rgba(14,158,140,.5);animation:pulse 2.2s infinite}
+.hero h1{font-size:clamp(34px,6vw,56px);line-height:1.02;font-weight:800;letter-spacing:-.02em;margin-bottom:14px}
+.hero h1 .accent{color:var(--teal)}
+.hero .sub{font-size:18px;color:var(--txt-dim);max-width:62ch;margin-bottom:30px}
+.statline{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:34px}
+.chip{font-family:var(--mono);font-size:12.5px;color:var(--txt-dim);background:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:7px 14px;display:inline-flex;align-items:center;gap:7px}
+.chip b{color:var(--txt);font-weight:700}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:var(--teal)}
+
+.panel{background:linear-gradient(180deg,#FFFFFF,var(--ink-2));border:1px solid var(--line);border-radius:var(--r);padding:24px;box-shadow:var(--shadow)}
+.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0 4px}
+@media(max-width:640px){.setup-grid{grid-template-columns:1fr}}
+.setup-card{background:var(--ink-2);border:1px solid var(--line);border-radius:12px;padding:18px}
+.setup-card h3{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--txt-faint);font-weight:700;margin-bottom:14px;font-family:var(--mono)}
+.opt-row{display:flex;flex-wrap:wrap;gap:8px}
+.toggle{font-family:var(--mono);font-size:13px;padding:9px 14px;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--txt-dim);cursor:pointer;transition:all .14s}
+.toggle:hover{border-color:var(--teal-dim);color:var(--txt)}
+.toggle.on{background:var(--teal-bg);border-color:var(--teal);color:var(--teal)}
+.topic-list{display:flex;flex-direction:column;gap:8px}
+.topic-check{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:10px;border:1px solid var(--line);background:transparent;cursor:pointer;transition:all .14s;text-align:left;width:100%;color:var(--txt-dim)}
+.topic-check:hover{border-color:var(--teal-dim)}
+.topic-check.on{background:var(--teal-bg);border-color:var(--teal-dim);color:var(--txt)}
+.topic-check .box{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--line-soft);display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:all .14s}
+.topic-check.on .box{background:var(--teal);border-color:var(--teal)}
+.topic-check.on .box::after{content:'✓';color:var(--on-accent);font-size:13px;font-weight:800}
+.topic-check .tnum{font-family:var(--mono);font-size:12px;color:var(--txt-faint);min-width:48px}
+.topic-check .tname{font-size:14px;font-weight:600;flex:1}
+.topic-check .tcount{font-family:var(--mono);font-size:12px;color:var(--txt-faint)}
+.start-row{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:24px;flex-wrap:wrap}
+.start-row .count{font-family:var(--mono);font-size:14px;color:var(--txt-dim)}
+.start-row .count b{color:var(--teal);font-size:22px;font-weight:800}
+
+.howto{margin-top:26px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:640px){.howto{grid-template-columns:1fr}}
+.howto .h{background:var(--ink-2);border:1px solid var(--line);border-left:3px solid var(--teal-dim);border-radius:10px;padding:15px}
+.howto .h .t{font-weight:700;font-size:14px;margin-bottom:5px;display:flex;align-items:center;gap:8px}
+.howto .h .d{font-size:13px;color:var(--txt-dim)}
+
+/* ============ QUIZ HEADER / PROGRESS ============ */
+.topbar{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);margin:-24px -20px 22px;padding:14px 20px}
+.topbar-inner{max-width:980px;margin:0 auto;display:flex;align-items:center;gap:16px}
+.tb-title{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt-faint);font-weight:600;white-space:nowrap}
+.tb-title b{color:var(--teal)}
+.progress-wrap{flex:1;height:6px;background:var(--ink-3);border-radius:99px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--teal-dim),var(--teal));border-radius:99px;transition:width .35s cubic-bezier(.4,0,.2,1);width:0}
+.tb-meta{font-family:var(--mono);font-size:13px;color:var(--txt-dim);white-space:nowrap}
+.tb-meta b{color:var(--txt)}
+.tb-clock{font-family:var(--mono);font-size:13px;color:var(--txt-dim);background:var(--ink-2);border:1px solid var(--line);border-radius:8px;padding:5px 11px;white-space:nowrap}
+
+/* ============ QUESTION CARD ============ */
+.qcard{animation:fadeUp .32s ease both}
+.q-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}
+.q-tag{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.q-num{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--teal);background:var(--teal-bg);border:1px solid var(--teal-dim);border-radius:8px;padding:5px 11px}
+.q-topic{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--txt-faint);border:1px solid var(--line);border-radius:8px;padding:5px 10px}
+.q-text{font-size:21px;line-height:1.45;font-weight:600;letter-spacing:-.01em;margin-bottom:24px}
+@media(max-width:640px){.q-text{font-size:18px}}
+
+.opts{display:flex;flex-direction:column;gap:11px}
+.opt{display:flex;align-items:flex-start;gap:14px;padding:16px 18px;border:1px solid var(--line);background:var(--ink-2);border-radius:12px;cursor:pointer;transition:border-color .14s,background .14s,transform .1s;text-align:left;width:100%;color:var(--txt);font-family:var(--sans)}
+.opt:hover:not(.locked){border-color:var(--teal-dim);background:var(--ink-3)}
+.opt .letter{font-family:var(--mono);font-weight:700;font-size:14px;width:30px;height:30px;flex:0 0 auto;border-radius:8px;border:1px solid var(--line-soft);display:flex;align-items:center;justify-content:center;color:var(--txt-dim);transition:all .14s}
+.opt .otext{flex:1;font-size:15.5px;line-height:1.5;padding-top:3px}
+.opt.selected{border-color:var(--teal);background:var(--teal-bg)}
+.opt.selected .letter{background:var(--teal);border-color:var(--teal);color:var(--on-accent)}
+/* graded states */
+.opt.correct{border-color:var(--teal);background:var(--teal-bg)}
+.opt.correct .letter{background:var(--teal);border-color:var(--teal);color:var(--on-accent)}
+.opt.wrong{border-color:var(--red);background:var(--red-bg)}
+.opt.wrong .letter{background:var(--red);border-color:var(--red);color:var(--on-accent)}
+.opt.locked{cursor:default}
+.opt .mark{margin-left:auto;font-family:var(--mono);font-size:12px;font-weight:700;align-self:center;opacity:0;transition:opacity .2s}
+.opt.correct .mark{opacity:1;color:var(--teal)}
+.opt.wrong .mark{opacity:1;color:var(--red)}
+
+/* explanation (instant feedback mode) */
+.explain{margin-top:18px;border:1px solid var(--line);border-left:3px solid var(--teal);background:var(--ink-2);border-radius:10px;padding:16px 18px;animation:fadeUp .3s ease both}
+.explain.miss{border-left-color:var(--red)}
+.explain .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:7px;color:var(--teal)}
+.explain.miss .lbl{color:var(--red)}
+.explain p{font-size:14.5px;color:var(--txt-dim);line-height:1.6}
+
+/* ============ NAV CONTROLS ============ */
+.nav-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:28px;flex-wrap:wrap}
+.nav-left,.nav-right{display:flex;gap:10px;align-items:center}
+.flag-btn{background:transparent;border:1px solid var(--line);color:var(--txt-faint);border-radius:9px;padding:11px 15px;font-size:13.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .14s;font-family:var(--sans)}
+.flag-btn:hover{border-color:var(--amber);color:var(--amber)}
+.flag-btn.on{background:var(--amber-bg);border-color:var(--amber);color:var(--amber)}
+
+/* ============ QUESTION NAVIGATOR (BACKTRACKING) ============ */
+.navigator{margin-top:30px;background:var(--ink-2);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.navigator-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px;flex-wrap:wrap}
+.navigator-head .t{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt-faint);font-weight:700}
+.legend{display:flex;gap:14px;flex-wrap:wrap}
+.legend span{font-family:var(--mono);font-size:11px;color:var(--txt-dim);display:inline-flex;align-items:center;gap:6px}
+.legend i{width:11px;height:11px;border-radius:4px;display:inline-block}
+.legend .l-ans{background:var(--teal)}
+.legend .l-flag{background:var(--amber)}
+.legend .l-cur{background:transparent;border:2px solid var(--txt)}
+.legend .l-empty{background:var(--ink-3);border:1px solid var(--line)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:8px}
+.gcell{aspect-ratio:1;border-radius:9px;border:1px solid var(--line);background:var(--ink-3);color:var(--txt-dim);font-family:var(--mono);font-size:13px;font-weight:600;cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center;position:relative}
+.gcell:hover{border-color:var(--teal-dim);transform:translateY(-1px)}
+.gcell.answered{background:var(--teal-bg);border-color:var(--teal-dim);color:var(--teal)}
+.gcell.flagged{border-color:var(--amber)}
+.gcell.flagged::after{content:'';position:absolute;top:3px;right:3px;width:6px;height:6px;border-radius:50%;background:var(--amber)}
+.gcell.current{border:2px solid var(--txt);color:var(--txt)}
+.gcell.correct{background:var(--teal-bg);border-color:var(--teal);color:var(--teal)}
+.gcell.incorrect{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+
+/* ============ REVIEW / SUBMIT SCREEN ============ */
+.review .panel{margin-bottom:18px}
+.review h2{font-size:26px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
+.review .lead{color:var(--txt-dim);font-size:15px;margin-bottom:20px}
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:8px}
+@media(max-width:640px){.summary-grid{grid-template-columns:1fr 1fr}}
+.sbox{background:var(--ink-2);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center}
+.sbox .n{font-family:var(--mono);font-size:30px;font-weight:800;line-height:1}
+.sbox .l{font-size:12px;color:var(--txt-faint);text-transform:uppercase;letter-spacing:.1em;margin-top:7px;font-family:var(--mono)}
+.sbox.ans .n{color:var(--teal)}
+.sbox.flag .n{color:var(--amber)}
+.sbox.empty .n{color:var(--red)}
+.warn{background:var(--amber-bg);border:1px solid rgba(244,181,63,.35);border-radius:10px;padding:13px 16px;color:var(--amber);font-size:14px;margin-bottom:18px;display:flex;gap:10px;align-items:flex-start}
+
+/* ============ RESULTS ============ */
+.results-hero{text-align:center;padding:30px 0 10px;animation:fadeUp .5s ease both}
+.score-ring{width:190px;height:190px;margin:0 auto 22px;position:relative}
+.score-ring svg{transform:rotate(-90deg)}
+.score-ring .pct{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-ring .pct .big{font-family:var(--mono);font-size:46px;font-weight:800;line-height:1}
+.score-ring .pct .sm{font-size:12px;color:var(--txt-faint);text-transform:uppercase;letter-spacing:.14em;margin-top:4px;font-family:var(--mono)}
+.verdict{font-size:24px;font-weight:800;margin-bottom:8px}
+.verdict.pass{color:var(--teal)} .verdict.mid{color:var(--amber)} .verdict.low{color:var(--red)}
+.results-sub{color:var(--txt-dim);font-size:15px;margin-bottom:26px}
+.topic-bars{margin:8px 0 24px}
+.tbar{margin-bottom:14px}
+.tbar .row{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:6px}
+.tbar .row .nm{font-weight:600}
+.tbar .row .sc{font-family:var(--mono);color:var(--txt-dim)}
+.tbar .track{height:9px;background:var(--ink-3);border-radius:99px;overflow:hidden}
+.tbar .fill{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+
+/* review list of all answers */
+.rev-list{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+.rev-item{background:var(--ink-2);border:1px solid var(--line);border-radius:12px;padding:16px 18px;border-left:3px solid var(--line)}
+.rev-item.ok{border-left-color:var(--teal)}
+.rev-item.no{border-left-color:var(--red)}
+.rev-item .rq{font-size:15.5px;font-weight:600;margin-bottom:10px;display:flex;gap:10px}
+.rev-item .rq .rn{font-family:var(--mono);font-size:13px;color:var(--txt-faint);flex:0 0 auto}
+.rev-ans{font-size:14px;display:flex;gap:9px;padding:5px 0;align-items:flex-start}
+.rev-ans .rl{font-family:var(--mono);font-weight:700;flex:0 0 auto;width:20px}
+.rev-ans.you-ok{color:var(--teal)}
+.rev-ans.you-no{color:var(--red)}
+.rev-ans.corr{color:var(--teal)}
+.rev-ans.dim{color:var(--txt-faint)}
+.rev-exp{margin-top:10px;font-size:13.5px;color:var(--txt-dim);background:var(--ink-3);border-radius:8px;padding:11px 13px;line-height:1.55}
+.rev-filter{display:flex;gap:8px;margin:18px 0 6px;flex-wrap:wrap}
+
+.footer-note{text-align:center;color:var(--txt-faint);font-size:12.5px;margin-top:40px;font-family:var(--mono)}
+
+/* keyboard hint */
+.kbd{font-family:var(--mono);font-size:11px;background:var(--ink-3);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:2px 6px;color:var(--txt-dim)}
+.hint-bar{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:18px;font-size:12px;color:var(--txt-faint)}
+.hint-bar span{display:inline-flex;align-items:center;gap:6px}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(14,158,140,.45)}70%{box-shadow:0 0 0 10px rgba(14,158,140,0)}100%{box-shadow:0 0 0 0 rgba(14,158,140,0)}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+
+/* focus visibility */
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+button:focus{outline:none}
+button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ============================================================
+// SABV THEORY QUIZ — full question bank (theory only, no calculation)
+// Each item: { id, topic, q, options:[a,b,c,d], answer:index, explain }
+// Sources: module overviews, chapter class-discussion summaries, weekly
+// notes, topic slides (Pearson, Titman/Martin), revision session.
+// ============================================================
+const QUESTIONS = [
+// ---------------- TOPIC 1 ----------------
+{id:1,topic:1,q:"What determines the value of an investment under the discounted cash flow (DCF) approach?",
+ options:["The total amount of money already spent on the investment to date","The magnitude and the timing of the cash flows it is expected to generate","The book value of the assets recorded on the balance sheet","The amount of debt used to finance the investment"],
+ answer:1,explain:"DCF states that value comes from the magnitude and timing of expected future cash flows — not from what has already been spent (which is sunk)."},
+{id:2,topic:1,q:"Which sequence correctly describes the three-step DCF process?",
+ options:["Estimate WACC → forecast FCF → compute book value","Forecast FCF → estimate the discount rate (WACC) → discount the FCFs","Compute IRR → compare to coupon rate → discount dividends","Discount FCFs → forecast FCF → estimate salvage value"],
+ answer:1,explain:"Step 1 forecast free cash flow, Step 2 estimate the discount rate (WACC) reflecting risk, Step 3 discount the FCFs back to present value."},
+{id:3,topic:1,q:"Relevant cash flows for valuing a project are best described as:",
+ options:["Average cash flows of the whole firm","Incremental cash flows — the additional cash flows that exist only if the project is undertaken","All historical cash flows of the division","Only the cash flows from financing activities"],
+ answer:1,explain:"Relevant cash flows are incremental: the extra cash flows (direct and indirect) that occur only because the project is accepted."},
+{id:4,topic:1,q:"Incremental cash flows include which of the following indirect effects?",
+ options:["Sunk costs already incurred","Cannibalization of the firm's other existing products","Interest expense on existing debt","Dividends paid in prior years"],
+ answer:1,explain:"Incremental cash flows capture indirect effects on other lines of business, such as cannibalization (revenue erosion) of existing products."},
+{id:5,topic:1,q:"Cannibalization in project analysis refers to:",
+ options:["A reduction in the cash flow of another product caused by taking on the new project","An increase in market share from a competitor","The tax benefit created by depreciation","The cost of borrowing to fund the project"],
+ answer:0,explain:"Cannibalization is the reduction in an existing product's cash flow that results from launching the new project; the lost cash flow must be subtracted."},
+{id:6,topic:1,q:"How should sunk costs be treated when evaluating a project?",
+ options:["Added to the initial investment","Subtracted from terminal value","Ignored entirely — they are not incremental","Discounted at the risk-free rate"],
+ answer:2,explain:"Sunk costs are already spent (or will be spent regardless of the decision) and are not incremental, so they are ignored in the DCF."},
+{id:7,topic:1,q:"A project has an NPV of exactly zero. According to the course, the firm should:",
+ options:["Reject it, because it adds no value","Accept it, because it earns a return exactly equal to the required rate of return","Recompute using the coupon rate","Only accept it if there is no sunk cost involved"],
+ answer:1,explain:"An NPV of zero is acceptable and the project should be undertaken — it earns exactly the required return. (Even with a sunk cost, a zero-NPV project should still be taken.)"},
+{id:8,topic:1,q:"'Optimistic' cash flow forecasts most commonly arise when:",
+ options:["Managers' future bonuses are tied to meeting conservative targets","A manager receives a bonus for getting a promising investment approved, or is overconfident","The risk-free rate is very high","The firm uses accrual accounting"],
+ answer:1,explain:"Optimism appears when managers are rewarded for getting projects approved (or are overconfident), leading to overly positive forecasts."},
+{id:9,topic:1,q:"'Conservative' cash flow forecasts typically result when:",
+ options:["The cash-flow forecast will serve as future targets that influence future bonuses","Managers want the project approved at any cost","The project has no working capital needs","The discount rate is set below the cost of capital"],
+ answer:0,explain:"Conservatism arises when forecasts become future targets tied to bonuses, so managers set lower, more achievable numbers."},
+{id:10,topic:1,q:"For valuation, which cash flows should be used?",
+ options:["'Hoped-for' (best-case) cash flows","Expected (probability-weighted, most likely) cash flows","The highest of the optimistic estimates","Conservative cash flows only"],
+ answer:1,explain:"Valuation uses Expected cash flows — the probability-weighted, most likely outcome — not the optimistic 'hoped-for' scenario."},
+{id:11,topic:1,q:"The theoretically correct way to respond to managerial optimism is to:",
+ options:["Increase the discount rate by an arbitrary premium","Adjust (fix) the cash-flow forecasts themselves","Lower the tax rate in the model","Ignore the working capital line"],
+ answer:1,explain:"The correct response is to correct the cash-flow forecasts, not to inflate the discount rate, which would bias decisions."},
+{id:12,topic:1,q:"Project (Firm) Free Cash Flow, FCFF, is available for distribution to:",
+ options:["Common shareholders only","Both the firm's creditors and its equity holders","Preferred shareholders only","The government, via taxes"],
+ answer:1,explain:"FCFF is the cash available to ALL capital providers — both creditors and equity holders — so it is used to value the whole firm/project."},
+{id:13,topic:1,q:"Equity Free Cash Flow (FCFE) is the cash flow available to:",
+ options:["All creditors and equity holders","The firm's common shareholders only, after creditors are paid","Bondholders before any other claimants","Suppliers and employees"],
+ answer:1,explain:"FCFE is the cash flow available to common shareholders only, after the firm's creditors have been paid."},
+{id:14,topic:1,q:"When computing Project/Firm FCF (FCFF), interest expense is:",
+ options:["Subtracted, because it is a cash outflow","NOT subtracted, because interest belongs to creditors who are among the capital providers being valued","Added back after tax","Treated the same as depreciation"],
+ answer:1,explain:"Interest is not subtracted in FCFF because it belongs to creditors (capital providers); financing effects are captured in the WACC, not the cash flows."},
+{id:15,topic:1,q:"Why is depreciation added back when calculating free cash flow?",
+ options:["Because it increases the firm's taxes","Because it is a non-cash accounting charge; the real cash outflow already happened as CAPEX","Because it is paid in cash to suppliers each year","Because it is part of interest expense"],
+ answer:1,explain:"Depreciation is a non-cash expense — the cash outflow occurred earlier as CAPEX — so it is added back after being used to compute the correct tax."},
+{id:16,topic:1,q:"In the FCF formula FCF = EBIT(1−T) + D&A − CAPEX − ΔONWC, the term EBIT(1−T) is also known as:",
+ options:["Gross margin","NOPAT (Net Operating Profit After Tax)","Net income","Equity free cash flow"],
+ answer:1,explain:"EBIT(1−T) is NOPAT — net operating profit after tax — operating profit after tax but before financing effects."},
+{id:17,topic:1,q:"Which best distinguishes maintenance CAPEX from growth CAPEX?",
+ options:["Maintenance CAPEX expands capacity; growth CAPEX preserves it","Maintenance CAPEX keeps current capacity; growth CAPEX expands the scale of operations","Both refer to the same spending","Maintenance CAPEX is a financing activity"],
+ answer:1,explain:"Maintenance CAPEX maintains current capacity, while growth CAPEX is spending to expand the scale of operations."},
+{id:18,topic:1,q:"In computing ΔONWC, why are cash and short-term debt excluded?",
+ options:["Because they are non-cash items","Because they are financing items, not core operating items","Because they are always equal to zero","Because they are part of CAPEX"],
+ answer:1,explain:"Operating net working capital excludes cash and short-term debt because those are financing items, not part of the core operating business."},
+{id:19,topic:1,q:"According to the class notes, what does net working capital (NWC) represent?",
+ options:["A guaranteed source of profit","A buffer to handle unexpected events and a measure of liquidity risk","A type of long-term financing","The firm's depreciation schedule"],
+ answer:1,explain:"NWC is a buffer for unexpected events and a measure of liquidity risk; if NWC = 0 the firm may face liquidity problems and future bankruptcy risk."},
+{id:20,topic:1,q:"If a firm's net working capital equals zero, the class notes say:",
+ options:["The firm is certain to go bankrupt immediately","The firm is not certain to go bankrupt, but may face liquidity problems and future bankruptcy risk","The firm has no cash flows","The firm cannot pay any dividends ever"],
+ answer:1,explain:"NWC = 0 does not guarantee bankruptcy, but it signals possible liquidity problems and a future risk of bankruptcy."},
+{id:21,topic:1,q:"Which two tools are used to evaluate an investment once FCFs and the discount rate are set?",
+ options:["Beta and YTM","NPV and IRR","SMB and HML","Goal Seek and Data Table"],
+ answer:1,explain:"NPV (dollar value added) and IRR (percentage rate of return) are used to evaluate the investment."},
+{id:22,topic:1,q:"The internal rate of return (IRR) is defined as:",
+ options:["The discount rate that makes NPV equal to zero","The firm's cost of debt","The average of the optimistic and conservative returns","The growth rate of dividends"],
+ answer:0,explain:"IRR is the discount rate at which the project's NPV equals zero."},
+{id:23,topic:1,q:"A key limitation of IRR relative to NPV is that:",
+ options:["IRR cannot be computed in Excel","IRR can produce multiple values when cash-flow signs change more than once, and can mislead when ranking mutually exclusive projects","IRR always ignores the time value of money","IRR requires the use of beta"],
+ answer:1,explain:"IRR can give multiple values with sign changes and can mislead for mutually exclusive or different-scale projects; NPV is preferred in conflicts."},
+{id:24,topic:1,q:"Regarding reinvestment assumptions, NPV and IRR differ because:",
+ options:["NPV assumes reinvestment at the IRR; IRR at the cost of capital","NPV assumes reinvestment at the cost of capital; IRR implicitly at the IRR","Both assume reinvestment at the risk-free rate","Neither makes any reinvestment assumption"],
+ answer:1,explain:"NPV assumes interim cash flows are reinvested at the cost of capital (realistic); IRR implicitly assumes reinvestment at the IRR (often unrealistic)."},
+{id:25,topic:1,q:"Mutually exclusive projects are best described as:",
+ options:["Projects that must all be accepted together","Alternatives where choosing one rules out the others","Projects with identical cash flows","Projects financed only with equity"],
+ answer:1,explain:"Mutually exclusive projects are alternatives — accepting one means the others cannot be undertaken; rank by NPV."},
+{id:26,topic:1,q:"When NPV and IRR give conflicting rankings for mutually exclusive projects, which should you follow?",
+ options:["IRR, because it is a percentage","NPV, because it directly measures wealth creation","Whichever is larger numerically","The payback period instead"],
+ answer:1,explain:"Follow NPV in conflicts — it directly measures the dollar value (wealth) added to the firm."},
+
+// ---------------- TOPIC 2 ----------------
+{id:27,topic:2,q:"In project risk analysis, risk is defined as:",
+ options:["The probability of a sunk cost","The variation of the expected return","The firm's tax rate","The coupon on its bonds"],
+ answer:1,explain:"Risk is the variation (dispersion) of the expected return; outcomes are uncertain and only some will occur."},
+{id:28,topic:2,q:"In Phase I of evaluating an investment, the analyst primarily:",
+ options:["Identifies sources of risk and monitors them","Estimates value: envisions outcomes, prepares forecasts, and computes NPV/IRR","Repays the firm's long-term debt","Sets the dividend policy"],
+ answer:1,explain:"Phase I is estimating value — envisioning outcomes, preparing forecasts, and computing measures of worth such as NPV and IRR."},
+{id:29,topic:2,q:"In Phase II of evaluating an investment, the analyst:",
+ options:["Builds the initial FCF model only","Identifies the underlying sources of risk, assesses uncertainties, and seeks to mitigate and monitor them","Calculates the bond's yield to maturity","Chooses the depreciation method"],
+ answer:1,explain:"Phase II is analysing and managing risk: identifying risk sources and key value drivers, assessing uncertainty, and monitoring throughout the project."},
+{id:30,topic:2,q:"Scenario analysis is best described as a technique that:",
+ options:["Changes only one variable while holding others constant","Explores the sensitivity of value under different future situations (e.g., best/base/worst case)","Produces a full probability distribution of NPV","Solves for the rate where NPV = 0"],
+ answer:1,explain:"Scenario analysis examines value under a few discrete future situations (such as best, base and worst case), often shifting inputs together."},
+{id:31,topic:2,q:"Which is a disadvantage of scenario analysis?",
+ options:["It requires special simulation software","It has no standardized method for defining scenarios and ignores explicit probabilities","It can only handle a single variable","It always produces a negative NPV"],
+ answer:1,explain:"Scenario analysis lacks a standard way to define scenarios, ignores explicit probabilities, and assumes variables move together rather than being correlated realistically."},
+{id:32,topic:2,q:"Break-even (sensitivity) analysis finds:",
+ options:["The critical value of a value driver that makes NPV equal to zero","The average of best and worst scenarios","The firm's optimal capital structure","The dividend growth rate"],
+ answer:0,explain:"Break-even sensitivity analysis finds the critical value of a single driver that pushes NPV down to zero."},
+{id:33,topic:2,q:"Which Excel tool is used to find a break-even value?",
+ options:["SLOPE","Goal Seek (Data ▸ What-If Analysis)","RATE","CORREL"],
+ answer:1,explain:"Goal Seek (Data ▸ What-If Analysis) sets the NPV cell to zero by changing the chosen driver cell."},
+{id:34,topic:2,q:"In break-even analysis, a driver that requires only a SMALL percentage change to reach zero NPV is:",
+ options:["Irrelevant to the decision","More critical, because even a small adverse move could sink the project","Always the discount rate","Guaranteed to be profitable"],
+ answer:1,explain:"The smaller the change needed to reach zero NPV, the more critical that driver — a small adverse move there could make the project unprofitable."},
+{id:35,topic:2,q:"A key limitation of break-even sensitivity analysis is that it:",
+ options:["Considers many variables at once","Considers only one value driver at a time while holding the others at expected values","Requires 1,000 simulation trials","Cannot be done in Excel"],
+ answer:1,explain:"Break-even sensitivity changes only one driver at a time, which is misleading if several critical drivers are correlated; it also ignores probabilities."},
+{id:36,topic:2,q:"Simulation (Monte Carlo) analysis is especially valuable because it:",
+ options:["Changes only one factor at a time","Allows multiple variables to change at the same time and summarizes outcomes in a probability distribution","Eliminates all project risk","Avoids the need to forecast cash flows"],
+ answer:1,explain:"Simulation lets many interrelated variables vary simultaneously and produces a probability distribution of NPV, overcoming the one-variable limit of break-even analysis."},
+{id:37,topic:2,q:"Which statistics are used to interpret the results of a Monte Carlo simulation?",
+ options:["Only the maximum NPV","Mean, standard deviation, minimum, maximum and number of observations of the simulated NPVs","Only the coupon rate","Beta and the risk-free rate"],
+ answer:1,explain:"You summarize the ~1,000 simulated NPVs with mean, standard deviation, min, max and count to understand the distribution and variability."},
+{id:38,topic:2,q:"A noted disadvantage of simulation analysis is that:",
+ options:["It can only use two scenarios","It can be challenging to build and does not directly tell the investor whether to proceed","It ignores the time value of money","It cannot handle correlated variables"],
+ answer:1,explain:"Simulation is complex to build and describes the distribution of outcomes but does not, by itself, make the go/no-go decision."},
+{id:39,topic:2,q:"Decision trees are valuable tools because they:",
+ options:["Eliminate the need for a discount rate","Capture the value of investment flexibility (e.g., options to expand, delay, or abandon)","Replace the income statement","Compute beta directly"],
+ answer:1,explain:"Decision trees organize decisions where management can react as uncertainty resolves, capturing the value of flexibility that a single static NPV would miss."},
+{id:40,topic:2,q:"Which ordering of the three risk techniques reflects increasing ability to handle MANY interrelated variables at once?",
+ options:["Simulation → break-even → scenario","Break-even (one variable) → scenario (a few states) → simulation (many variables simultaneously)","Scenario → simulation → break-even","They all handle the same number of variables"],
+ answer:1,explain:"Break-even handles one variable, scenario a few discrete states, and simulation many variables simultaneously — the most powerful for interrelated factors."},
+
+// ---------------- TOPIC 3 ----------------
+{id:41,topic:3,q:"WACC is best defined as:",
+ options:["The firm's cost of equity only","The weighted average of the expected after-tax rates of return of the firm's various sources of capital","The yield on government bonds","The firm's average tax rate"],
+ answer:1,explain:"WACC is the weighted average of the after-tax required returns on the firm's sources of capital (debt, preferred, equity), used as the discount rate for firm FCF."},
+{id:42,topic:3,q:"Why does WACC use the AFTER-TAX cost of debt?",
+ options:["Because interest is tax-deductible, creating a tax shield that lowers the effective cost of debt","Because debt is riskier than equity","Because dividends are tax-deductible","Because the risk-free rate is after tax"],
+ answer:0,explain:"Interest is tax-deductible, so debt creates a tax shield; using the after-tax cost of debt captures these tax savings — the core WACC–tax-shield relationship."},
+{id:43,topic:3,q:"Why should capital-structure weights be based on MARKET values rather than book values?",
+ options:["Book values are always larger","Market values reflect the current relative worth of the firm's securities, while book values are historical costs from issuance","Market values are easier to find","Regulators require book values"],
+ answer:1,explain:"Market values reflect the current relative worth of the securities; book values are historical issuance costs and may bear little relation to today's economics."},
+{id:44,topic:3,q:"To estimate the cost of debt for valuing an upcoming project, the course uses:",
+ options:["The bond's coupon rate","The current yield to maturity (YTM) on the firm's debt","The dividend yield","The risk-free rate minus a spread"],
+ answer:1,explain:"WACC values upcoming projects, so the current YTM (re-priced to today) is used; the coupon rate would only reflect a past cost."},
+{id:45,topic:3,q:"The cost of preferred equity is calculated as:",
+ options:["Preferred dividend ÷ price of the preferred share","Price ÷ preferred dividend","Risk-free rate + beta × market premium","Coupon ÷ face value"],
+ answer:0,explain:"Cost of preferred = preferred dividend ÷ price of the preferred share (rearranged, price = dividend ÷ required return)."},
+{id:46,topic:3,q:"Under the CAPM, the cost of equity equals:",
+ options:["rf + β × (rm − rf)","D1/P + g","rd × (1 − T)","rf − β × (rm − rf)"],
+ answer:0,explain:"CAPM: cost of equity = risk-free rate + beta × market risk premium (rm − rf)."},
+{id:47,topic:3,q:"Beta measures:",
+ options:["The firm's liquidity risk","The sensitivity of a stock's returns to variations in the return on the overall market portfolio","The firm's tax shield","The dividend payout ratio"],
+ answer:1,explain:"Beta is the sensitivity of a stock's equity returns to movements in the overall market portfolio (its systematic risk)."},
+{id:48,topic:3,q:"A stock with a beta of 1.80 is expected to be:",
+ options:["80% less volatile than the market","About 80% more volatile than the market","Uncorrelated with the market","Equal in volatility to the market"],
+ answer:1,explain:"A beta of 1.80 means the stock is expected to be about 80% more volatile than the market."},
+{id:49,topic:3,q:"A negative beta indicates that a stock:",
+ options:["Has no risk at all","Has an inverse relationship with the market","Always outperforms the market","Pays no dividends"],
+ answer:1,explain:"A negative beta indicates an inverse relationship with the market (uncommon for most stocks)."},
+{id:50,topic:3,q:"Levered (equity) beta differs from unlevered (asset) beta because levered beta:",
+ options:["Excludes the effect of financial leverage","Incorporates the firm's financial leverage and is used directly in the cost-of-equity calculation","Is always smaller than unlevered beta","Applies only to debt holders"],
+ answer:1,explain:"Levered beta incorporates financial leverage and feeds the CAPM cost of equity; unlevered (asset) beta strips leverage out."},
+{id:51,topic:3,q:"Unlevered beta (asset beta) is best described as:",
+ options:["The volatility of returns for a business without considering its financial leverage","The beta of the firm's debt only","The market's average beta","Beta after adding a country risk premium"],
+ answer:0,explain:"Unlevered (asset) beta is the volatility of business returns without financial leverage, used as an input when determining the cost of equity in WACC."},
+{id:52,topic:3,q:"Why do analysts UNLEVER the betas of comparable firms?",
+ options:["To add the effect of their capital structures","To remove the influence of their differing capital structures","To convert them into bond yields","To eliminate market risk"],
+ answer:1,explain:"Unlevering removes the influence of each comparable firm's capital structure so the underlying business risk can be compared."},
+{id:53,topic:3,q:"After averaging the unlevered betas of comparables, analysts RELEVER to:",
+ options:["The industry-average capital structure","The target firm's own capital structure (its debt-to-equity ratio)","A zero-debt structure","The risk-free benchmark"],
+ answer:1,explain:"Relevering adjusts the average unlevered beta to reflect the target firm's specific financing mix (its D/E), giving a tailored measure of its risk."},
+{id:54,topic:3,q:"In the beta-from-comparables procedure (Table 4-1), what debt beta is commonly assumed?",
+ options:["0.00","0.30","1.00","Equal to the equity beta"],
+ answer:1,explain:"A debt beta of 0.30 is commonly assumed for all firms in the comparable-firm unlevering/relevering procedure."},
+{id:55,topic:3,q:"In the comparable-firm method, 'equity value' is computed as:",
+ options:["Book value of equity from the balance sheet","Current stock price × number of shares outstanding","Total assets minus total liabilities at cost","Par value × number of bonds"],
+ answer:1,explain:"Equity value equals the current stock price times the number of outstanding shares (market capitalization)."},
+{id:56,topic:3,q:"The Fama-French three-factor model adds which factors beyond the market premium?",
+ options:["Liquidity and momentum","SMB (size premium) and HML (value premium)","Coupon and maturity","Beta and alpha"],
+ answer:1,explain:"Fama-French adds SMB (small-minus-big size premium) and HML (high-minus-low book-to-market value premium) to the market factor."},
+{id:57,topic:3,q:"In the Fama-French model, the SMB factor captures the:",
+ options:["Value premium based on book-to-market","Size premium (return of small-cap minus large-cap portfolios)","Market risk premium","Tax shield from debt"],
+ answer:1,explain:"SMB (small minus big) is the size premium — the return on a small-cap portfolio minus a large-cap portfolio."},
+{id:58,topic:3,q:"The discounted-cash-flow (dividend) approach gives cost of equity as:",
+ options:["rs = D1/P + g","rs = rf + β(rm − rf)","rs = rd(1 − T)","rs = D0 × (1 − g)"],
+ answer:0,explain:"Rearranging the dividend model P = D1/(rs − g) gives rs = D1/P + g."},
+{id:59,topic:3,q:"WACC can validly be used to value a firm only when:",
+ options:["The firm has no debt","The firm's debt-to-equity ratio is expected to stay constant","The firm pays no dividends","Interest rates are zero"],
+ answer:1,explain:"WACC is valid only if the D/E ratio stays constant; if the capital structure changes over time, use the Adjusted Present Value (APV) method instead."},
+{id:60,topic:3,q:"The Adjusted Present Value (APV) method values a firm as:",
+ options:["FCF divided by the coupon rate","The value of the firm as if all-equity financed, plus the NPV of the debt-financing (tax-shield) benefits","Equity value minus preferred stock","Only the present value of dividends"],
+ answer:1,explain:"APV = value of the firm if all-equity financed + NPV of the financing (tax-shield) benefits; used when leverage changes over time."},
+{id:61,topic:3,q:"Compared with the cost of equity or the cost of debt alone, WACC is preferred for valuing the firm because it:",
+ options:["Is always the lowest of the three","Encompasses ALL sources of capital the company uses, not just one","Ignores taxes","Only reflects shareholder returns"],
+ answer:1,explain:"WACC encompasses all sources of capital (debt, preferred, equity), unlike the cost of equity (shareholders only) or cost of debt (creditors only)."},
+
+// ---------------- TOPIC 4 ----------------
+{id:62,topic:4,q:"According to Graham and Harvey (2001), more than half of surveyed firms used:",
+ options:["A different discount rate for every single project","A single, company-wide discount rate for all proposals","Only the risk-free rate","The APV method exclusively"],
+ answer:1,explain:"Graham and Harvey (2001) found that over 50% of firms used a single company-wide discount rate for all investment proposals."},
+{id:63,topic:4,q:"A single company-wide discount rate works well when:",
+ options:["The firm operates across many different countries and industries","The firm is engaged in a narrow spectrum of activities with similar risk","Projects vary widely in risk","The firm uses only non-recourse debt"],
+ answer:1,explain:"A single rate is appropriate for firms in a narrow spectrum of activities; it is simple and avoids the discretion problems of multiple rates."},
+{id:64,topic:4,q:"The guiding principle for project discount rates is that:",
+ options:["All projects should use the firm's WACC","Less risky projects that add more debt capacity should require a LOWER discount rate","Riskier projects should use a lower rate","The rate should equal the coupon rate"],
+ answer:1,explain:"Projects that are less risky and add more to the firm's debt capacity should carry a lower discount rate, reflecting their lower opportunity cost of capital."},
+{id:65,topic:4,q:"Using a SINGLE discount rate for projects of differing risk tends to cause a firm to:",
+ options:["Under-invest in risky divisions and over-invest in safe ones","Over-invest in risky divisions and under-invest in safe ones","Allocate capital perfectly","Avoid all risky projects"],
+ answer:1,explain:"A single rate over-values risky projects and under-values safe ones, leading to over-investment in risky divisions and under-investment in safe ones."},
+{id:66,topic:4,q:"How does the divisional WACC approach correct this bias?",
+ options:["By using one rate for the whole firm","By setting a higher hurdle for risky divisions and a lower hurdle for safe divisions","By ignoring risk entirely","By using only the cost of debt"],
+ answer:1,explain:"A separate cost of capital per division raises the hurdle for risky divisions and lowers it for safe ones, allocating capital correctly."},
+{id:67,topic:4,q:"Besides reflecting risk, multiple (e.g., divisional) discount rates also:",
+ options:["Eliminate the need for cash-flow forecasts","Mitigate incentive problems by tying the cost of capital to verifiable outside market forces","Always reduce the cost of capital","Remove the tax shield"],
+ answer:1,explain:"Estimating rates systematically from market forces mitigates managerial-discretion incentive problems, since the rate is verifiable and tied to outside data."},
+{id:68,topic:4,q:"A disadvantage of the divisional WACC approach is:",
+ options:["It cannot be computed in Excel","A poor or wrongly-sized sample of comparable firms, and differing leverage or project risk within a division","It ignores the time value of money","It always understates risk"],
+ answer:1,explain:"Divisional WACC suffers from poor/too-small or too-large comparable samples, differing capital structures among comps, and varying project risk within a division."},
+{id:69,topic:4,q:"A project-specific WACC is most appropriate when the project uses:",
+ options:["Internal equity only","Non-recourse debt, where the project's own assets are the sole collateral","The firm's general corporate bonds","No financing at all"],
+ answer:1,explain:"Project-specific WACC applies with non-recourse (project) financing, where the project's own assets/cash flows are the only collateral."},
+{id:70,topic:4,q:"A non-recourse loan means that, on default, the lender:",
+ options:["Can pursue all of the borrower's other assets","Can seize only the specified collateral, even if it does not cover the full debt","Has no claim on anything","Automatically converts the debt to equity"],
+ answer:1,explain:"With non-recourse debt the lender can claim only the specified collateral; there is no recourse to the sponsoring firm's other assets."},
+{id:71,topic:4,q:"Because debt holders have no recourse to the firm's other assets, non-recourse debt tends to:",
+ options:["Carry lower interest rates and lower the WACC","Carry higher interest rates (higher risk), which raises the project's WACC","Have no effect on the WACC","Eliminate the cost of equity"],
+ answer:1,explain:"Non-recourse debt is riskier for lenders, so it tends to carry higher interest rates, which raises the project's WACC."},
+{id:72,topic:4,q:"Project debt capacity is best described as:",
+ options:["The total assets of the firm","The additional debt the firm can take on from the project without lowering its credit rating","The project's depreciation expense","The firm's dividend capacity"],
+ answer:1,explain:"Debt capacity is the extra debt the project supports without lowering the firm's credit rating; more efficient, less volatile projects support more debt capacity."},
+{id:73,topic:4,q:"A less volatile (more efficient) project supports greater debt capacity because:",
+ options:["Its profits are more sensitive to price changes","Its profits are less sensitive to price changes, so it can more reliably service debt","It has no operating risk by definition","It uses only equity financing"],
+ answer:1,explain:"Lower operating volatility means profits are less sensitive to price changes, so the project can more reliably service debt — supporting more debt capacity."},
+{id:74,topic:4,q:"A project financed with proportionally LESS debt will, all else equal, have a:",
+ options:["Higher project-specific WACC","Lower project-specific WACC","Zero WACC","WACC equal to the risk-free rate"],
+ answer:1,explain:"Less debt in the mix lowers the project-specific WACC (other things equal)."},
+{id:75,topic:4,q:"Firms often set hurdle rates ABOVE the cost of capital mainly to:",
+ options:["Increase managerial bonuses","Counteract managerial over-optimism in cash-flow projections","Reduce the firm's tax bill","Satisfy bondholders"],
+ answer:1,explain:"Hurdle rates are set above the cost of capital to offset managerial over-optimism, ensuring only the most promising projects are approved."},
+{id:76,topic:4,q:"To deal with optimism, the theoretically correct approach is to:",
+ options:["Add an arbitrary premium to the discount rate","Adjust the cash flows (use realistic expected cash flows) and discount at the appropriate risk-adjusted rate","Lower the tax rate","Use the coupon rate as the discount rate"],
+ answer:1,explain:"The correct approach is to adjust the cash flows to realistic expected values and discount at the appropriate rate, rather than padding the discount rate (which biases decisions)."},
+
+// ---------------- TOPIC 5 ----------------
+{id:77,topic:5,q:"What is the difference between cash-basis and accrual-basis accounting?",
+ options:["They are identical","Cash accounting records transactions when cash actually moves; accrual records revenues when earned and expenses when incurred, regardless of cash timing","Accrual accounting ignores all expenses","Cash accounting is used only for the balance sheet"],
+ answer:1,explain:"Cash accounting records when cash moves; accrual accounting (income statement & balance sheet) records revenues/expenses when earned/incurred, so profit ≠ cash flow."},
+{id:78,topic:5,q:"The income statement and balance sheet are prepared using:",
+ options:["Cash accounting","Accrual accounting","Only tax accounting","No consistent basis"],
+ answer:1,explain:"Both the income statement and balance sheet are prepared on an accrual basis, so their entries do not necessarily correspond to cash transfers in the period."},
+{id:79,topic:5,q:"The balance-sheet identity states that:",
+ options:["Assets = Liabilities − Equity","Assets = Liabilities + Shareholders' Equity","Equity = Assets + Liabilities","Liabilities = Assets + Equity"],
+ answer:1,explain:"The balance-sheet identity is Assets = Liabilities + Shareholders' Equity."},
+{id:80,topic:5,q:"Operating income differs from non-operating income in that operating income:",
+ options:["Comes from investments unrelated to the core business","Is generated by the firm's core business operations","Is always tax-free","Equals net income"],
+ answer:1,explain:"Operating income comes from the firm's core business (e.g., Sony selling TVs), while non-operating income comes from unrelated investments."},
+{id:81,topic:5,q:"An equity investment of MORE than 20% but LESS than 50% of another firm is recorded as:",
+ options:["A passive investment at cost","An investment (with significant influence)","A full consolidation","An expense"],
+ answer:1,explain:"An investment of >20% but <50% is recorded as an investment, reflecting significant (but not controlling) influence."},
+{id:82,topic:5,q:"An equity investment of LESS than 20% of another firm is generally:",
+ options:["Fully consolidated","Classified as a passive investment, recorded at cost (cost method) and adjusted for dividends received","Recorded as a liability","Treated as goodwill"],
+ answer:1,explain:"A <20% stake is a passive investment under the cost method — recorded at initial cost and adjusted for dividends — with no significant influence."},
+{id:83,topic:5,q:"The statement of cash flows is divided into which three parts?",
+ options:["Sales, costs, and profit","Operating, investing, and financing activities","Assets, liabilities, and equity","Debt, preferred, and common"],
+ answer:1,explain:"The cash flow statement reports cash flows from operating, investing, and financing activities."},
+{id:84,topic:5,q:"The statement of cash flows primarily reflects:",
+ options:["Past cash flows from prior years","Current cash flows — the movement of cash in and out during the current period","Future projected cash flows","Only non-cash transactions"],
+ answer:1,explain:"It records current-period cash inflows and outflows, converting accrual-based statements into cash flows for the period."},
+{id:85,topic:5,q:"In building the cash flow statement, an INCREASE in accounts receivable is:",
+ options:["Added to net income","Subtracted from net income, because credit sales were made but cash not yet collected","Ignored","Treated as a financing inflow"],
+ answer:1,explain:"An increase in AR means more credit sales than cash collected, so it is subtracted from net income to reflect actual operating cash."},
+{id:86,topic:5,q:"In building the cash flow statement, an INCREASE in accounts payable is:",
+ options:["Subtracted from net income","Added to net income, because expenses were incurred but cash not yet paid","Treated as an investing outflow","Ignored"],
+ answer:1,explain:"An increase in AP means expenses were recorded but cash not yet paid, so it is added back to net income."},
+{id:87,topic:5,q:"In building the cash flow statement, an INCREASE in net fixed assets (CAPEX) is:",
+ options:["Added to net income","Subtracted from net income, because cash was spent on equipment/buildings","Treated as a financing inflow","Recorded as revenue"],
+ answer:1,explain:"An increase in net fixed assets reflects cash spent on new assets (CAPEX), so it is subtracted from net income."},
+{id:88,topic:5,q:"In building the cash flow statement, an INCREASE in short-term debt is:",
+ options:["Subtracted from net income","Added to net income, because borrowing brought in cash","Ignored","Treated as an operating expense"],
+ answer:1,explain:"An increase in short-term debt is cash brought in by borrowing, so it is added to net income (a financing inflow)."},
+{id:89,topic:5,q:"A DECREASE in long-term liabilities is treated in the cash flow statement as:",
+ options:["An addition to net income","A subtraction, because cash was used to repay debt","Revenue","An investing inflow"],
+ answer:1,explain:"A decrease in long-term liabilities reflects cash used to repay debt, so it is subtracted from net income."},
+{id:90,topic:5,q:"Which is a difference between 'cash provided by operations' and firm free cash flow?",
+ options:["Firm FCF subtracts CAPEX (an investing item) and is computed before financing effects","They are identical by definition","Firm FCF ignores taxes","Cash from operations subtracts CAPEX but firm FCF does not"],
+ answer:0,explain:"Firm FCF subtracts CAPEX (an investing-section item) and is computed before financing/interest effects, treating non-operating income separately — unlike the operations subtotal."},
+{id:91,topic:5,q:"How is non-operating income generally treated in valuation?",
+ options:["Combined with operating FCF and discounted at WACC","Separated from operating FCF and valued separately, since it is not from core operations","Always ignored","Added to CAPEX"],
+ answer:1,explain:"Non-operating income comes from assets unrelated to the core business, so it is generally separated from operating FCF and valued on its own."},
+{id:92,topic:5,q:"The percent-of-sales method for pro forma statements:",
+ options:["Sets every item to a fixed dollar amount","Expresses income-statement and many balance-sheet items as a constant percentage of revenue, driven off the sales forecast","Uses only the coupon rate","Ignores historical data"],
+ answer:1,explain:"The percent-of-sales method expresses items as a constant % of revenue and drives them off the sales forecast, based on historical relationships."},
+{id:93,topic:5,q:"In constructing a pro forma balance sheet, the 'plug' figure is often:",
+ options:["Goodwill","Short-term debt (or a financing line) that balances the balance sheet","Depreciation","Dividends"],
+ answer:1,explain:"A plug — frequently short-term debt — is the balancing item that makes the pro forma balance sheet balance once other items are set."},
+{id:94,topic:5,q:"What is the correct order of the four-step financial forecasting process?",
+ options:["Estimate terminal value → build pro formas → analyse history → convert to cash flows","Analyse historical statements → construct pro forma statements → convert to cash-flow forecasts → estimate terminal value","Convert to cash flows → analyse history → estimate terminal value → build pro formas","Build pro formas → estimate terminal value → analyse history → convert to cash flows"],
+ answer:1,explain:"The four steps: (1) analyse historical statements, (2) construct pro formas, (3) convert to cash-flow forecasts, (4) estimate terminal value, then combine for enterprise value."},
+{id:95,topic:5,q:"Why does a firm's ability to generate cash flows in the PAST matter for valuation?",
+ options:["It guarantees identical future cash flows","It provides important insights about its ability to generate FUTURE cash flows","It determines the coupon rate","It sets the risk-free rate"],
+ answer:1,explain:"Historical financial statements show how the firm has made money, providing important insights about its ability to generate future cash flows."},
+{id:96,topic:5,q:"The growing-perpetuity terminal value formula is:",
+ options:["Final-Year FCF × (1 + g) ÷ (WACC − g)","Final-Year FCF ÷ WACC","Final-Year FCF × WACC × g","Final-Year FCF ÷ (g − WACC)"],
+ answer:0,explain:"Terminal Value = Final-Year FCF × (1 + g) ÷ (WACC − g), the growing-perpetuity formula for value beyond the planning period."},
+{id:97,topic:5,q:"Enterprise value in a DCF with an explicit planning period equals:",
+ options:["PV of planning-period FCFs only","PV of planning-period FCFs + PV of the terminal value","Terminal value only","Initial investment + terminal value"],
+ answer:1,explain:"Enterprise value = PV of the planning-period FCFs + PV of the terminal value."},
+{id:98,topic:5,q:"Although financial statements use accrual accounting, the chapter emphasizes that they:",
+ options:["Cannot be used for valuation","Can be readily translated back into cash flows that form the basis for valuing the firm","Should be discarded in favour of the coupon rate","Only matter for tax purposes"],
+ answer:1,explain:"Despite being prepared under accrual rules, the statements can be translated back into cash flows, which form the basis for valuing the firm."},
+
+// ---------------- ADDED FROM ALL-EXERCISES / SOLUTIONS ----------------
+{id:99,topic:4,q:"A firm's WACC is 10%, but a proposed project has very low risk with an IRR of 8%. How can the project still have a positive NPV even though its IRR is below the company's WACC?",
+ options:["It cannot — a project with IRR below WACC always has a negative NPV","If the project is essentially risk-free, the correct discount rate is the (lower) risk-free rate; if that rate is below 8%, the project has a positive NPV","Only if the firm ignores the time value of money","Only if the project's cash flows are reinvested at the WACC"],
+ answer:1,explain:"The company-wide WACC reflects average risk. A very low-risk project should be discounted at a lower, risk-adjusted rate (toward the risk-free rate). If that appropriate rate is below the project's IRR, NPV is positive even though IRR < WACC."},
+{id:100,topic:3,q:"Besides the (β_Equity + β_Debt·D/E)/(1 + D/E) form, which equivalent expression is used in the course to unlever a comparable firm's beta directly from its EV weights?",
+ options:["β_Unlevered = β_Debt × (Debt/EV) + β_Levered × (Equity/EV)","β_Unlevered = β_Levered × (1 + D/E)","β_Unlevered = β_Equity − β_Debt","β_Unlevered = β_Levered ÷ (1 − T)"],
+ answer:0,explain:"The unlevered (asset) beta is the value-weighted average of the debt and equity betas: β_U = β_Debt×(Debt/EV) + β_Levered×(Equity/EV). This is the EV-weighted form used in the McDonald's and airline solutions."},
+{id:101,topic:3,q:"When a bond's market price is exactly equal to its par (face) value, its yield to maturity (YTM) is:",
+ options:["Always higher than the coupon rate","Exactly equal to the coupon rate","Always lower than the coupon rate","Equal to the risk-free rate"],
+ answer:1,explain:"At a price equal to par, the YTM equals the coupon rate. The bond trades at a premium when YTM < coupon and at a discount when YTM > coupon."},
+{id:102,topic:3,q:"What is the relationship between a bond's price and changes in its YTM, and how does maturity affect it?",
+ options:["Price moves in the same direction as YTM; maturity has no effect","Price moves inversely to YTM, and longer-maturity bonds are MORE sensitive (more volatile) to YTM changes","Price moves inversely to YTM, and longer-maturity bonds are LESS sensitive","Price is unaffected by YTM changes"],
+ answer:1,explain:"Bond price moves inversely to YTM — when required yields rise, prices fall. Longer-maturity bonds show greater price volatility for a given change in YTM."},
+{id:103,topic:4,q:"In the project-specific WACC approach based on debt capacity, the weight of debt is calculated as:",
+ options:["The firm's overall market-value debt ratio","The project's debt capacity divided by the project's investment (Debt-to-Value)","Always 50%","The project's IRR divided by the WACC"],
+ answer:1,explain:"The weights come from the project's DEBT CAPACITY, not how it happens to be financed. D/V = debt capacity ÷ investment; WACC = (1 − D/V)×cost of equity + D/V×after-tax cost of debt."},
+];
+
+// ================= SABV THEORY QUIZ APP =================
+const TOPIC_NAMES = {
+  1:"Forecasting & Valuing Cash Flows",
+  2:"Project Risk Analysis",
+  3:"Cost of Capital (WACC)",
+  4:"Required Rates of Return",
+  5:"Forecasting Financial Performance"
+};
+const LETTERS = ["A","B","C","D"];
+
+// ---- App state ----
+const state = {
+  screen:"start",            // start | quiz | review | results
+  selectedTopics:new Set([1,2,3,4,5]),
+  mode:"exam",               // exam (grade at end) | study (instant feedback)
+  order:"sequential",        // sequential | shuffle
+  deck:[],                   // array of question objects in play order
+  answers:{},                // qid -> chosen index
+  flags:new Set(),           // qids flagged for review
+  revealed:new Set(),        // qids revealed in study mode
+  current:0,                 // index into deck
+  startTime:null,
+  elapsed:0,
+  timerId:null,
+  resultFilter:"all"         // all | wrong | flagged
+};
+
+const $app = document.getElementById("app");
+const byTopicCount = t => QUESTIONS.filter(q=>q.topic===t).length;
+
+function fmtTime(s){
+  const m=Math.floor(s/60), ss=s%60;
+  return `${m}:${ss<10?"0":""}${ss}`;
+}
+
+// ---------- shuffle ----------
+function shuffle(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+// =========================================================
+// START SCREEN
+// =========================================================
+function renderStart(){
+  const total = [...state.selectedTopics].reduce((n,t)=>n+byTopicCount(t),0);
+  $app.innerHTML = `
+  <div class="hero">
+    <div class="kicker">
+      <span class="pulse"></span>
+      <span class="eyebrow">SABV · Midterm Revision</span>
+    </div>
+    <h1>Theory <span class="accent">Quiz</span></h1>
+    <p class="sub">Trắc nghiệm lý thuyết (A/B/C/D) bao phủ toàn bộ 5 chủ đề định giá: dòng tiền, rủi ro dự án, WACC, suất sinh lời yêu cầu và dự báo tài chính. Tự do nhảy qua lại giữa các câu như đề thi thật.</p>
+    <div class="statline">
+      <span class="chip"><span class="dot"></span><b>${QUESTIONS.length}</b> câu hỏi lý thuyết</span>
+      <span class="chip"><span class="dot"></span><b>5</b> chủ đề</span>
+      <span class="chip"><span class="dot"></span>Có <b>backtracking</b> &amp; đánh dấu ôn lại</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="setup-grid">
+      <div class="setup-card">
+        <h3>① Chọn chủ đề</h3>
+        <div class="topic-list" id="topicList"></div>
+      </div>
+      <div class="setup-card">
+        <h3>② Chế độ làm bài</h3>
+        <div class="opt-row" style="margin-bottom:18px">
+          <button class="toggle ${state.mode==='exam'?'on':''}" data-mode="exam">Thi thử · chấm ở cuối</button>
+          <button class="toggle ${state.mode==='study'?'on':''}" data-mode="study">Ôn tập · hiện đáp án ngay</button>
+        </div>
+        <h3 style="margin-top:4px">③ Thứ tự câu hỏi</h3>
+        <div class="opt-row">
+          <button class="toggle ${state.order==='sequential'?'on':''}" data-order="sequential">Theo thứ tự</button>
+          <button class="toggle ${state.order==='shuffle'?'on':''}" data-order="shuffle">Xáo trộn</button>
+        </div>
+        <div style="margin-top:20px;font-size:13px;color:var(--txt-faint);line-height:1.6">
+          ${state.mode==='exam'
+            ? 'Đáp án &amp; giải thích chỉ hiện sau khi bạn nộp bài — giống đề thi thật.'
+            : 'Mỗi câu sẽ hiện ngay đáp án đúng và lời giải sau khi bạn chọn.'}
+        </div>
+      </div>
+    </div>
+
+    <div class="start-row">
+      <div class="count">Bộ đề: <b id="qCount">${total}</b> câu</div>
+      <button class="btn btn-primary btn-lg" id="startBtn">Bắt đầu làm bài →</button>
+    </div>
+  </div>
+
+  <div class="howto">
+    <div class="h"><div class="t">↔ Nhảy tự do</div><div class="d">Dùng lưới câu hỏi bên dưới mỗi câu để nhảy đến bất kỳ câu nào, bất cứ lúc nào.</div></div>
+    <div class="h"><div class="t">⚑ Đánh dấu ôn lại</div><div class="d">Gắn cờ câu chưa chắc chắn rồi quay lại sau, trước khi nộp.</div></div>
+    <div class="h"><div class="t">⌨ Phím tắt</div><div class="d">Bấm A–D để chọn, ← → để chuyển câu, F để gắn cờ.</div></div>
+  </div>
+
+  <div class="footer-note">Lý thuyết được tổng hợp đầy đủ từ tài liệu môn học · 98 câu · không có câu tính toán</div>
+  `;
+
+  // topic list
+  const tl = document.getElementById("topicList");
+  [1,2,3,4,5].forEach(t=>{
+    const on = state.selectedTopics.has(t);
+    const b = document.createElement("button");
+    b.className = "topic-check"+(on?" on":"");
+    b.innerHTML = `<span class="box"></span><span class="tnum">Topic ${t}</span><span class="tname">${TOPIC_NAMES[t]}</span><span class="tcount">${byTopicCount(t)}</span>`;
+    b.onclick = ()=>{
+      if(state.selectedTopics.has(t)) state.selectedTopics.delete(t);
+      else state.selectedTopics.add(t);
+      if(state.selectedTopics.size===0) state.selectedTopics.add(t); // keep at least 1
+      renderStart();
+    };
+    tl.appendChild(b);
+  });
+
+  document.querySelectorAll("[data-mode]").forEach(el=>el.onclick=()=>{state.mode=el.dataset.mode;renderStart();});
+  document.querySelectorAll("[data-order]").forEach(el=>el.onclick=()=>{state.order=el.dataset.order;renderStart();});
+  document.getElementById("startBtn").onclick = startQuiz;
+}
+
+// =========================================================
+// QUIZ FLOW
+// =========================================================
+function startQuiz(){
+  let deck = QUESTIONS.filter(q=>state.selectedTopics.has(q.topic));
+  // keep stable topic order, but optionally shuffle
+  deck = state.order==='shuffle' ? shuffle(deck) : deck.slice().sort((a,b)=> a.topic-b.topic || a.id-b.id);
+  state.deck = deck;
+  state.answers = {};
+  state.flags = new Set();
+  state.revealed = new Set();
+  state.current = 0;
+  state.screen = "quiz";
+  state.startTime = Date.now();
+  state.elapsed = 0;
+  if(state.timerId) clearInterval(state.timerId);
+  state.timerId = setInterval(()=>{
+    state.elapsed = Math.floor((Date.now()-state.startTime)/1000);
+    const c = document.getElementById("clock");
+    if(c) c.textContent = "⏱ "+fmtTime(state.elapsed);
+  },1000);
+  renderQuiz();
+}
+
+function answeredCount(){ return state.deck.filter(q=>state.answers[q.id]!==undefined).length; }
+
+function renderQuiz(){
+  const q = state.deck[state.current];
+  const total = state.deck.length;
+  const chosen = state.answers[q.id];
+  const isRevealed = state.mode==='study' && state.revealed.has(q.id);
+  const pct = Math.round((answeredCount()/total)*100);
+
+  $app.innerHTML = `
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="tb-title">SABV · <b>Theory</b></div>
+      <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
+      <div class="tb-meta">Đã làm <b>${answeredCount()}</b>/${total}</div>
+      <div class="tb-clock" id="clock">⏱ ${fmtTime(state.elapsed)}</div>
+    </div>
+  </div>
+
+  <div class="qcard">
+    <div class="q-head">
+      <div class="q-tag">
+        <span class="q-num">Câu ${state.current+1} / ${total}</span>
+        <span class="q-topic">Topic ${q.topic} · ${TOPIC_NAMES[q.topic]}</span>
+      </div>
+      <button class="flag-btn ${state.flags.has(q.id)?'on':''}" id="flagBtn">
+        ${state.flags.has(q.id)?'⚑ Đã đánh dấu':'⚐ Đánh dấu ôn lại'}
+      </button>
+    </div>
+
+    <div class="q-text">${q.q}</div>
+
+    <div class="opts" id="opts"></div>
+
+    <div id="explainSlot"></div>
+
+    <div class="nav-row">
+      <div class="nav-left">
+        <button class="btn btn-ghost" id="prevBtn" ${state.current===0?'disabled':''}>← Câu trước</button>
+      </div>
+      <div class="nav-right">
+        ${state.current===total-1
+          ? `<button class="btn btn-primary" id="reviewBtn">Xem lại &amp; nộp bài →</button>`
+          : `<button class="btn btn-primary" id="nextBtn">Câu tiếp →</button>`}
+      </div>
+    </div>
+  </div>
+
+  ${renderNavigator(false)}
+
+  <div class="hint-bar">
+    <span><span class="kbd">A</span>–<span class="kbd">D</span> chọn</span>
+    <span><span class="kbd">←</span><span class="kbd">→</span> chuyển câu</span>
+    <span><span class="kbd">F</span> gắn cờ</span>
+    <span><span class="kbd">R</span> xem lại</span>
+  </div>
+  `;
+
+  // options
+  const optsEl = document.getElementById("opts");
+  q.options.forEach((opt,i)=>{
+    const b = document.createElement("button");
+    let cls = "opt";
+    if(isRevealed){
+      cls += " locked";
+      if(i===q.answer) cls += " correct";
+      else if(i===chosen) cls += " wrong";
+    } else if(chosen===i){
+      cls += " selected";
+    }
+    b.className = cls;
+    const mark = isRevealed ? (i===q.answer?'<span class="mark">ĐÚNG</span>':(i===chosen?'<span class="mark">SAI</span>':'')) : '';
+    b.innerHTML = `<span class="letter">${LETTERS[i]}</span><span class="otext">${opt}</span>${mark}`;
+    if(!isRevealed){
+      b.onclick = ()=>selectAnswer(q,i);
+    }
+    optsEl.appendChild(b);
+  });
+
+  // explanation in study mode
+  if(isRevealed){
+    const correct = chosen===q.answer;
+    document.getElementById("explainSlot").innerHTML = `
+      <div class="explain ${correct?'':'miss'}">
+        <div class="lbl">${correct?'✓ Chính xác':'✕ Chưa đúng — đáp án: '+LETTERS[q.answer]}</div>
+        <p>${q.explain}</p>
+      </div>`;
+  }
+
+  // wire nav
+  const flagBtn=document.getElementById("flagBtn");
+  flagBtn.onclick=()=>{ toggleFlag(q.id); };
+  const prev=document.getElementById("prevBtn"); if(prev) prev.onclick=()=>goTo(state.current-1);
+  const next=document.getElementById("nextBtn"); if(next) next.onclick=()=>goTo(state.current+1);
+  const rev=document.getElementById("reviewBtn"); if(rev) rev.onclick=()=>{state.screen="review";renderReview();window.scrollTo(0,0);};
+  wireNavigator();
+}
+
+function selectAnswer(q,i){
+  state.answers[q.id]=i;
+  if(state.mode==='study') state.revealed.add(q.id);
+  renderQuiz();
+}
+
+function toggleFlag(qid){
+  if(state.flags.has(qid)) state.flags.delete(qid);
+  else state.flags.add(qid);
+  renderQuiz();
+}
+
+function goTo(idx){
+  if(idx<0||idx>=state.deck.length) return;
+  state.current=idx;
+  renderQuiz();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ---------- NAVIGATOR GRID (backtracking) ----------
+function renderNavigator(graded){
+  const cells = state.deck.map((q,idx)=>{
+    let cls="gcell";
+    const answered = state.answers[q.id]!==undefined;
+    if(graded){
+      if(answered) cls += state.answers[q.id]===q.answer ? " correct":" incorrect";
+    }else{
+      if(answered) cls+=" answered";
+    }
+    if(state.flags.has(q.id)) cls+=" flagged";
+    if(!graded && idx===state.current) cls+=" current";
+    return `<button class="${cls}" data-idx="${idx}">${idx+1}</button>`;
+  }).join("");
+  return `
+  <div class="navigator">
+    <div class="navigator-head">
+      <span class="t">Bản đồ câu hỏi — bấm để nhảy đến</span>
+      <div class="legend">
+        <span><i class="l-ans"></i>Đã trả lời</span>
+        <span><i class="l-flag"></i>Đánh dấu</span>
+        ${graded?'<span><i class="l-cur" style="border-color:var(--red)"></i>Sai</span>':'<span><i class="l-cur"></i>Hiện tại</span>'}
+        <span><i class="l-empty"></i>Chưa làm</span>
+      </div>
+    </div>
+    <div class="grid" id="navGrid">${cells}</div>
+  </div>`;
+}
+function wireNavigator(){
+  const g=document.getElementById("navGrid");
+  if(!g) return;
+  g.querySelectorAll(".gcell").forEach(c=>{
+    c.onclick=()=>goTo(parseInt(c.dataset.idx));
+  });
+}
+
+// =========================================================
+// REVIEW SCREEN (before submit)
+// =========================================================
+function renderReview(){
+  const total=state.deck.length;
+  const ans=answeredCount();
+  const empty=total-ans;
+  const flagged=state.flags.size;
+
+  $app.innerHTML = `
+  <div class="review">
+    <div class="panel">
+      <h2>Xem lại trước khi nộp</h2>
+      <p class="lead">Kiểm tra lại các câu chưa làm hoặc đã đánh dấu. Bấm vào ô bất kỳ để quay lại câu đó.</p>
+      <div class="summary-grid">
+        <div class="sbox"><div class="n">${total}</div><div class="l">Tổng câu</div></div>
+        <div class="sbox ans"><div class="n">${ans}</div><div class="l">Đã làm</div></div>
+        <div class="sbox empty"><div class="n">${empty}</div><div class="l">Chưa làm</div></div>
+        <div class="sbox flag"><div class="n">${flagged}</div><div class="l">Đánh dấu</div></div>
+      </div>
+    </div>
+
+    ${empty>0?`<div class="warn">⚠ Bạn còn <b style="margin:0 4px">${empty}</b> câu chưa trả lời. Các câu bỏ trống sẽ bị tính là sai.</div>`:''}
+
+    ${renderNavigator(false)}
+
+    <div class="nav-row" style="margin-top:24px">
+      <button class="btn btn-ghost" id="backToQuiz">← Quay lại làm tiếp</button>
+      <div class="nav-right">
+        ${empty>0?`<button class="btn btn-amber" id="jumpEmpty">Đến câu chưa làm</button>`:''}
+        <button class="btn btn-primary btn-lg" id="submitBtn">Nộp bài &amp; xem điểm</button>
+      </div>
+    </div>
+  </div>
+  `;
+  wireNavigator();
+  document.getElementById("backToQuiz").onclick=()=>{state.screen="quiz";renderQuiz();window.scrollTo(0,0);};
+  document.getElementById("submitBtn").onclick=submitQuiz;
+  const je=document.getElementById("jumpEmpty");
+  if(je) je.onclick=()=>{
+    const idx=state.deck.findIndex(q=>state.answers[q.id]===undefined);
+    if(idx>=0){state.screen="quiz";goTo(idx);}
+  };
+}
+
+// =========================================================
+// RESULTS
+// =========================================================
+function submitQuiz(){
+  if(state.timerId){clearInterval(state.timerId);state.timerId=null;}
+  state.screen="results";
+  renderResults();
+  window.scrollTo(0,0);
+}
+
+function computeScore(){
+  let correct=0;
+  const perTopic={};
+  state.deck.forEach(q=>{
+    if(!perTopic[q.topic]) perTopic[q.topic]={c:0,t:0};
+    perTopic[q.topic].t++;
+    if(state.answers[q.id]===q.answer){correct++;perTopic[q.topic].c++;}
+  });
+  return {correct,total:state.deck.length,perTopic};
+}
+
+function renderResults(){
+  const {correct,total,perTopic}=computeScore();
+  const pct=Math.round((correct/total)*100);
+  const circ=2*Math.PI*82;
+  const dash=circ*(pct/100);
+  let verdict,vclass,ringColor;
+  if(pct>=80){verdict="Xuất sắc — sẵn sàng thi!";vclass="pass";ringColor="var(--teal)";}
+  else if(pct>=60){verdict="Khá tốt — ôn thêm vài chỗ";vclass="mid";ringColor="var(--amber)";}
+  else{verdict="Cần ôn lại kỹ hơn";vclass="low";ringColor="var(--red)";}
+
+  $app.innerHTML = `
+  <div class="results-hero">
+    <div class="score-ring">
+      <svg width="190" height="190" viewBox="0 0 190 190">
+        <circle cx="95" cy="95" r="82" fill="none" stroke="var(--ink-3)" stroke-width="12"/>
+        <circle cx="95" cy="95" r="82" fill="none" stroke="${ringColor}" stroke-width="12"
+          stroke-linecap="round" stroke-dasharray="${dash} ${circ}" style="transition:stroke-dasharray 1s ease"/>
+      </svg>
+      <div class="pct"><div class="big">${pct}%</div><div class="sm">${correct}/${total} đúng</div></div>
+    </div>
+    <div class="verdict ${vclass}">${verdict}</div>
+    <div class="results-sub">Hoàn thành trong ${fmtTime(state.elapsed)} · ${state.flags.size} câu đã đánh dấu</div>
+  </div>
+
+  <div class="panel" style="margin-bottom:18px">
+    <h3 style="font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt-faint);margin-bottom:18px">Kết quả theo chủ đề</h3>
+    <div class="topic-bars" id="topicBars"></div>
+  </div>
+
+  ${renderNavigator(true)}
+
+  <div style="margin-top:22px">
+    <div class="rev-filter">
+      <button class="toggle ${state.resultFilter==='all'?'on':''}" data-f="all">Tất cả (${total})</button>
+      <button class="toggle ${state.resultFilter==='wrong'?'on':''}" data-f="wrong">Câu sai (${total-correct})</button>
+      <button class="toggle ${state.resultFilter==='flagged'?'on':''}" data-f="flagged">Đã đánh dấu (${state.flags.size})</button>
+    </div>
+    <div class="rev-list" id="revList"></div>
+  </div>
+
+  <div class="nav-row" style="margin-top:28px;justify-content:center">
+    <button class="btn btn-ghost" id="retryBtn">↻ Làm lại bộ đề này</button>
+    <button class="btn btn-primary" id="homeBtn">Về trang chủ &amp; chọn lại chủ đề</button>
+  </div>
+
+  <div class="footer-note">SABV Theory Quiz · ôn tập lý thuyết định giá doanh nghiệp</div>
+  `;
+
+  // topic bars
+  const tb=document.getElementById("topicBars");
+  Object.keys(perTopic).sort().forEach(t=>{
+    const {c,tt}=perTopic[t]; const tot=perTopic[t].t;
+    const p=Math.round((c/tot)*100);
+    const col = p>=80?"var(--teal)":p>=60?"var(--amber)":"var(--red)";
+    const d=document.createElement("div");
+    d.className="tbar";
+    d.innerHTML=`<div class="row"><span class="nm">Topic ${t} · ${TOPIC_NAMES[t]}</span><span class="sc">${c}/${tot} · ${p}%</span></div>
+      <div class="track"><div class="fill" style="width:${p}%;background:${col}"></div></div>`;
+    tb.appendChild(d);
+  });
+
+  wireNavigator();
+  // make navigator cells jump into a per-question review (scroll to it)
+  document.querySelectorAll("#navGrid .gcell").forEach(c=>{
+    c.onclick=()=>{
+      state.resultFilter="all";
+      renderResults();
+      const idx=parseInt(c.dataset.idx);
+      const el=document.getElementById("rev-"+state.deck[idx].id);
+      if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.outline="2px solid var(--teal)";setTimeout(()=>el.style.outline="",1400);}
+    };
+  });
+
+  document.querySelectorAll("[data-f]").forEach(el=>el.onclick=()=>{state.resultFilter=el.dataset.f;renderResults();});
+  document.getElementById("retryBtn").onclick=()=>{startQuiz();};
+  document.getElementById("homeBtn").onclick=()=>{state.screen="start";renderStart();window.scrollTo(0,0);};
+
+  renderReviewList();
+}
+
+function renderReviewList(){
+  const list=document.getElementById("revList");
+  let items=state.deck;
+  if(state.resultFilter==='wrong') items=items.filter(q=>state.answers[q.id]!==q.answer);
+  if(state.resultFilter==='flagged') items=items.filter(q=>state.flags.has(q.id));
+  if(items.length===0){
+    list.innerHTML=`<div style="text-align:center;color:var(--txt-faint);padding:30px;font-family:var(--mono);font-size:14px">Không có câu nào ở mục này 🎉</div>`;
+    return;
+  }
+  list.innerHTML="";
+  items.forEach(q=>{
+    const chosen=state.answers[q.id];
+    const correct=chosen===q.answer;
+    const answered=chosen!==undefined;
+    const idx=state.deck.indexOf(q);
+    const item=document.createElement("div");
+    item.className="rev-item "+(correct?"ok":"no");
+    item.id="rev-"+q.id;
+
+    let answersHtml="";
+    q.options.forEach((opt,i)=>{
+      if(i===q.answer){
+        answersHtml+=`<div class="rev-ans corr"><span class="rl">${LETTERS[i]}</span><span>${opt} <b style="font-family:var(--mono);font-size:11px">← ĐÁP ÁN ĐÚNG</b></span></div>`;
+      } else if(i===chosen){
+        answersHtml+=`<div class="rev-ans you-no"><span class="rl">${LETTERS[i]}</span><span>${opt} <b style="font-family:var(--mono);font-size:11px">← BẠN CHỌN</b></span></div>`;
+      } else {
+        answersHtml+=`<div class="rev-ans dim"><span class="rl">${LETTERS[i]}</span><span>${opt}</span></div>`;
+      }
+    });
+    if(!answered){
+      answersHtml=`<div class="rev-ans you-no"><span class="rl">—</span><span><b style="font-family:var(--mono);font-size:11px">CHƯA TRẢ LỜI (tính là sai)</b></span></div>`+answersHtml;
+    }
+
+    item.innerHTML=`
+      <div class="rq"><span class="rn">Câu ${idx+1} · T${q.topic} · ${correct?'✓':'✕'}</span><span>${q.q}</span></div>
+      ${answersHtml}
+      <div class="rev-exp"><b style="color:var(--teal)">Vì sao:</b> ${q.explain}</div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+// =========================================================
+// KEYBOARD
+// =========================================================
+document.addEventListener("keydown",e=>{
+  if(state.screen!=="quiz") {
+    if(state.screen==="quiz"||state.screen==="review"){}
+    return;
+  }
+  const q=state.deck[state.current];
+  const k=e.key.toLowerCase();
+  if(["a","b","c","d"].includes(k)){
+    const i={a:0,b:1,c:2,d:3}[k];
+    const isRevealed=state.mode==='study'&&state.revealed.has(q.id);
+    if(!isRevealed){selectAnswer(q,i);}
+    e.preventDefault();
+  } else if(e.key==="ArrowRight"){ goTo(state.current+1); e.preventDefault(); }
+  else if(e.key==="ArrowLeft"){ goTo(state.current-1); e.preventDefault(); }
+  else if(k==="f"){ toggleFlag(q.id); e.preventDefault(); }
+  else if(k==="r"){ state.screen="review"; renderReview(); window.scrollTo(0,0); e.preventDefault(); }
+});
+
+// ---- boot ----
+renderStart();
+
+</script>
+</body>
+</html>
